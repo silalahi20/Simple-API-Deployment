@@ -8,13 +8,11 @@
 - [Penggunaan API Key](#penggunaan-api-key)
 - [Panduan Pengujian](#panduan-pengujian)
 - [Informasi Deployment](#informasi-deployment)
-- [Catatan Tambahan](#catatan-tambahan)
 - [Penanganan Error](#penanganan-error)
 - [Status API](#status-api)
-- [Rekomendasi Keamanan](#rekomendasi-keamanan)
 
 ## Gambaran Umum
-ParMusic API menyediakan layanan akses ke fitur-fitur musik melalui antarmuka pemrograman aplikasi (API). API ini terbagi menjadi dua jenis endpoint: publik dan terproteksi, di mana endpoint terproteksi memerlukan autentikasi menggunakan API key.
+ParMusic API menyediakan layanan akses ke fitur rekomendasi alat musik melalui antarmuka pemrograman aplikasi (API). API ini terbagi menjadi dua jenis endpoint: publik dan terproteksi, di mana endpoint terproteksi memerlukan autentikasi menggunakan API key.
 
 ## URL Dasar
 ```
@@ -176,13 +174,6 @@ fetch(`${baseUrl}/api/v1/secure/`, { headers })
 - Auto-scaling: Dikelola oleh Vercel
 - SSL: Aktif secara default
 
-## Catatan Tambahan
-- Semua response API dalam format JSON kecuali ditentukan lain
-- API dibangun menggunakan framework FastAPI
-- Jaga kerahasiaan API key dan jangan bagikan secara publik
-- Implementasi saat ini menggunakan penyimpanan dalam memori untuk API key dan data pengguna
-- Semua timestamp dalam UTC
-- API di-host pada infrastruktur serverless Vercel
 
 ## Penanganan Error
 API menggunakan kode status HTTP standar:
@@ -196,9 +187,3 @@ Anda dapat memeriksa status API dengan mengakses endpoint root:
 ```
 GET https://simple-api-deployment-one.vercel.app/
 ```
-
-## Rekomendasi Keamanan
-1. Selalu gunakan HTTPS untuk panggilan API
-2. Jangan tampilkan API key dalam kode sisi klien
-3. Implementasikan penanganan error yang tepat dalam aplikasi Anda
-4. Pantau penggunaan API melalui dashboard Vercel
