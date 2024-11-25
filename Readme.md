@@ -1,189 +1,185 @@
-# ParMusic API Documentation
+# Dokumentasi API ParMusic
 
-## Daftar Isi
-- [Gambaran Umum](#gambaran-umum)
-- [URL Dasar](#url-dasar)
-- [Autentikasi](#autentikasi)
-- [Endpoint yang Tersedia](#endpoint-yang-tersedia)
-- [Penggunaan API Key](#penggunaan-api-key)
-- [Panduan Pengujian](#panduan-pengujian)
-- [Informasi Deployment](#informasi-deployment)
-- [Penanganan Error](#penanganan-error)
-- [Status API](#status-api)
-
-## Gambaran Umum
-ParMusic API menyediakan layanan akses ke fitur rekomendasi alat musik melalui antarmuka pemrograman aplikasi (API). API ini terbagi menjadi dua jenis endpoint: publik dan terproteksi, di mana endpoint terproteksi memerlukan autentikasi menggunakan API key.
+Selamat datang di **API ParMusic**! API ini memungkinkan Anda untuk berinteraksi dengan platform ParMusic, yang mencakup autentikasi, endpoint publik, dan akses aman ke data spesifik pengguna.
 
 ## URL Dasar
+
+URL dasar untuk API yang sudah dideploy adalah:
+
 ```
 https://simple-api-deployment-one.vercel.app
 ```
 
+Anda dapat mengakses dokumentasi API interaktif menggunakan Swagger UI di:
+
+```
+https://simple-api-deployment-one.vercel.app/docs
+```
+
 ## Autentikasi
-Endpoint terproteksi memerlukan API key yang harus disertakan dalam header permintaan.
 
-**Nama Header:** `J-API-Key`  
-**Format:** Sertakan API key dalam header permintaan
-```
-J-API-Key: e54d4431-5dab-474e-b71a-0db1fcb9e659
-```
+API ParMusic menggunakan **API Key Authentication** dan **OAuth2 Bearer Tokens** untuk mengamankan endpoint. Berikut adalah ringkasan mekanisme autentikasi:
 
-### Kode Response Autentikasi
-- `200 OK`: Autentikasi berhasil
-- `401 Unauthorized`: API key tidak ada atau tidak valid
+### API Key Authentication
+- Kirimkan API Key di header request menggunakan nama header `J-API-Key`.
+- Contoh:
+  ```
+  J-API-Key: e54d4431-5dab-474e-b71a-0db1fcb9e659
+  ```
 
-## Endpoint yang Tersedia
+### OAuth2 Bearer Tokens
+- Dapatkan token melalui endpoint `/api/v1/auth/login`.
+- Sertakan token dalam header `Authorization`:
+  ```
+  Authorization: Bearer <token>
+  ```
 
-### 1. Endpoint Root
-```
-GET https://simple-api-deployment-one.vercel.app/
-```
-Mengembalikan informasi dasar tentang ParMusic API.
+## Endpoint
 
-#### Contoh Response
-```json
+### 1. Endpoint Publik
+Endpoint publik dapat diakses tanpa autentikasi.
+
+#### GET `/api/v1/public/`
+- **Deskripsi**: Mengembalikan pesan publik.
+- **Respons**:
+  ```json
+  "Public Route for ParMusic"
+  ```
+
+#### GET `/api/v1/public/google-login`
+- **Deskripsi**: Memulai proses login menggunakan Google (implementasi sedang dikembangkan).
+- **Respons**:
+  ```json
+  {
+    "message": "Login with Google initiated"
+  }
+  ```
+
+### 2. Endpoint Autentikasi
+Endpoint untuk login dan registrasi pengguna.
+
+#### POST `/api/v1/auth/login`
+- **Deskripsi**: Login pengguna dan menyediakan token autentikasi.
+- **Body Permintaan**:
+  ```json
+  {
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Respons**:
+  ```json
+  {
+    "message": "Login successful",
+    "user": {
+      "name": "string",
+      "email": "string",
+      "password": "string"
+    }
+  }
+  ```
+
+#### POST `/api/v1/auth/register`
+- **Deskripsi**: Registrasi pengguna baru.
+- **Body Permintaan**:
+  ```json
+  {
+    "name": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Respons**:
+  ```json
+  {
+    "message": "User registered successfully",
+    "user": {
+      "name": "string",
+      "email": "string",
+      "password": "string"
+    }
+  }
+  ```
+
+### 3. Endpoint Aman
+Endpoint ini memerlukan autentikasi yang valid.
+
+#### GET `/api/v1/secure/`
+- **Deskripsi**: Mengembalikan detail pengguna yang sudah diautentikasi.
+- **Headers**:
+  ```
+  J-API-Key: <api-key>
+  ```
+- **Respons**:
+  ```json
+  {
+    "name": "string",
+    "message": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+
+#### GET `/api/v1/secure/userid`
+- **Deskripsi**: Mengembalikan ID pengguna yang sudah diautentikasi.
+- **Headers**:
+  ```
+  J-API-Key: <api-key>
+  ```
+- **Respons**:
+  ```json
+  {
+    "user_id": "string"
+  }
+  ```
+
+## Contoh Permintaan
+
+### 1. Login
+**Permintaan**:
+```http
+POST /api/v1/auth/login HTTP/1.1
+Host: simple-api-deployment-one.vercel.app
+Content-Type: application/json
+
 {
-    "message": "This is Simple API Deployment for ParMusic with Authentication by Josia 1822075"
+  "email": "parmusic@example.com",
+  "password": "securepassword"
 }
 ```
-
-### 2. Route Publik
-
-#### Mengakses Route Publik
-```
-GET https://simple-api-deployment-one.vercel.app/api/v1/public/
-```
-Mengakses route publik yang tidak memerlukan autentikasi.
-
-##### Contoh Response
-```
-"Public Route for ParMusic"
-```
-
-### 3. Route Terproteksi
-
-#### Mendapatkan Informasi Pengguna
-```
-GET https://simple-api-deployment-one.vercel.app/api/v1/secure/
-```
-Mengembalikan informasi tentang pengguna yang terautentikasi.
-
-##### Headers yang Diperlukan
-```
-J-API-Key: e54d4431-5dab-474e-b71a-0db1fcb9e659
-```
-
-##### Contoh Response Sukses
+**Respons**:
 ```json
 {
+  "message": "Login successful",
+  "user": {
     "name": "ParMusic",
-    "message": "Semoga TST dapat A. A for Aminn"
+    "email": "parmusic@example.com",
+    "password": "$2b$12$..."
+  }
 }
 ```
 
-##### Contoh Response Error (API Key Invalid)
+### 2. Akses Endpoint Aman
+**Permintaan**:
+```http
+GET /api/v1/secure/userid HTTP/1.1
+Host: simple-api-deployment-one.vercel.app
+J-API-Key: e54d4431-5dab-474e-b71a-0db1fcb9e659
+```
+**Respons**:
 ```json
 {
-    "detail": "Missing or invalid API key"
+  "user_id": "ParMusic"
 }
 ```
 
-## Penggunaan API Key
-API menggunakan set API key yang telah ditentukan sebelumnya. Berikut adalah API key yang tersedia untuk pengujian:
+## Kode Error
+| Kode Status | Deskripsi                         |
+|-------------|-----------------------------------|
+| 401         | API key/token tidak valid        |
+| 400         | Permintaan tidak valid (contoh: email sudah terdaftar) |
+| 500         | Kesalahan server internal        |
 
-```
-API Key: e54d4431-5dab-474e-b71a-0db1fcb9e659
-```
+## Catatan
+- Ini adalah versi awal dari API. Fitur tambahan seperti Google Login sedang dalam pengembangan.
 
-## Panduan Pengujian
-
-### Menggunakan cURL
-
-1. Uji Endpoint Root:
-```bash
-curl https://simple-api-deployment-one.vercel.app/
-```
-
-2. Uji Route Publik:
-```bash
-curl https://simple-api-deployment-one.vercel.app/api/v1/public/
-```
-
-3. Uji Route Terproteksi:
-```bash
-curl -H "J-API-Key: e54d4431-5dab-474e-b71a-0db1fcb9e659" https://simple-api-deployment-one.vercel.app/api/v1/secure/
-```
-
-### Menggunakan Python Requests
-
-```python
-import requests
-
-# URL Dasar API
-base_url = "https://simple-api-deployment-one.vercel.app"
-
-# Headers untuk request terautentikasi
-headers = {
-    "J-API-Key": "e54d4431-5dab-474e-b71a-0db1fcb9e659"
-}
-
-# Uji endpoint root
-response = requests.get(base_url)
-print(response.json())
-
-# Uji route publik
-response = requests.get(f"{base_url}/api/v1/public/")
-print(response.text)
-
-# Uji route terproteksi
-response = requests.get(f"{base_url}/api/v1/secure/", headers=headers)
-print(response.json())
-```
-
-### Menggunakan JavaScript Fetch
-
-```javascript
-// URL Dasar API
-const baseUrl = "https://simple-api-deployment-one.vercel.app";
-
-// Headers untuk request terautentikasi
-const headers = {
-    "J-API-Key": "e54d4431-5dab-474e-b71a-0db1fcb9e659"
-};
-
-// Uji endpoint root
-fetch(baseUrl)
-    .then(response => response.json())
-    .then(data => console.log(data));
-
-// Uji route publik
-fetch(`${baseUrl}/api/v1/public/`)
-    .then(response => response.text())
-    .then(data => console.log(data));
-
-// Uji route terproteksi
-fetch(`${baseUrl}/api/v1/secure/`, { headers })
-    .then(response => response.json())
-    .then(data => console.log(data));
-```
-
-## Informasi Deployment
-- Platform: Vercel
-- URL Produksi: https://simple-api-deployment-one.vercel.app
-- Tipe Deployment: Serverless
-- Auto-scaling: Dikelola oleh Vercel
-- SSL: Aktif secara default
-
-
-## Penanganan Error
-API menggunakan kode status HTTP standar:
-- 200: Sukses
-- 401: Unauthorized (API key invalid atau tidak ada)
-- 404: Tidak Ditemukan
-- 500: Error Server Internal
-
-## Status API
-Anda dapat memeriksa status API dengan mengakses endpoint root:
-```
-GET https://simple-api-deployment-one.vercel.app/
-```
